@@ -1,0 +1,22 @@
+{
+  "name": "fusion-radiation",
+  "version": "1.0.0",
+  "description": "情報集約・通知システム - Discord日次ダイジェスト & Webダッシュボード",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js",
+    "test": "node main.js --test --limit 1",
+    "collect": "node main.js --collect-only",
+    "digest": "node main.js --digest-only"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2",
+    "rss-parser": "^3.13.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

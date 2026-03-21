@@ -1,0 +1,39 @@
+name: Fusion Radiation - Daily Digest
+
+on:
+  schedule:
+    # 毎日朝8時 (JST) = UTC 23:00 (前日)
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+    inputs:
+      hours_back:
+        description: '何時間前までの記事を取得するか'
+        required: false
+        default: '24'
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+  TZ: Asia/Tokyo
+
+jobs:
+  daily-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Fusion Radiation
+        run: node main.js --hours ${{ github.event.inputs.hours_back || '24' }}

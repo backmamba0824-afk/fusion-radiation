@@ -1,0 +1,107 @@
+{
+  "categories": [
+    "3DCG",
+    "AI",
+    "ゲーム開発",
+    "デザイン",
+    "デジタルマーケティング",
+    "映像制作",
+    "子育て",
+    "家計・NISA"
+  ],
+  "rss": [
+    {
+      "name": "Zenn - AI",
+      "url": "https://zenn.dev/topics/ai/feed",
+      "category": "AI"
+    },
+    {
+      "name": "Zenn - 機械学習",
+      "url": "https://zenn.dev/topics/machinelearning/feed",
+      "category": "AI"
+    },
+    {
+      "name": "Zenn - ChatGPT",
+      "url": "https://zenn.dev/topics/chatgpt/feed",
+      "category": "AI"
+    },
+    {
+      "name": "Zenn - Blender",
+      "url": "https://zenn.dev/topics/blender/feed",
+      "category": "3DCG"
+    },
+    {
+      "name": "Zenn - 3DCG",
+      "url": "https://zenn.dev/topics/3dcg/feed",
+      "category": "3DCG"
+    },
+    {
+      "name": "Zenn - Unity",
+      "url": "https://zenn.dev/topics/unity/feed",
+      "category": "ゲーム開発"
+    },
+    {
+      "name": "Zenn - Unreal Engine",
+      "url": "https://zenn.dev/topics/unrealengine/feed",
+      "category": "ゲーム開発"
+    },
+    {
+      "name": "Zenn - ゲーム開発",
+      "url": "https://zenn.dev/topics/gamedev/feed",
+      "category": "ゲーム開発"
+    },
+    {
+      "name": "Zenn - デザイン",
+      "url": "https://zenn.dev/topics/design/feed",
+      "category": "デザイン"
+    },
+    {
+      "name": "Blender Nation",
+      "url": "https://www.blendernation.com/feed/",
+      "category": "3DCG"
+    },
+    {
+      "name": "Unity Blog",
+      "url": "https://blog.unity.com/feed",
+      "category": "ゲーム開発"
+    },
+    {
+      "name": "Smashing Magazine",
+      "url": "https://www.smashingmagazine.com/feed/",
+      "category": "デザイン"
+    },
+    {
+      "name": "Web担当者Forum",
+      "url": "https://webtan.impress.co.jp/rss",
+      "category": "デジタルマーケティング"
+    },
+    {
+      "name": "MarkeZine",
+      "url": "https://markezine.jp/rss/new/20/index.xml",
+      "category": "デジタルマーケティング"
+    },
+    {
+      "name": "GIGAZINE",
+      "url": "https://gigazine.net/news/rss_2.0/",
+      "category": "AI"
+    },
+    {
+      "name": "MONEY PLUS",
+      "url": "https://media.moneyforward.com/feed",
+      "category": "家計・NISA"
+    }
+  ],
+  "youtube": [
+    {
+      "name": "Blender Guru",
+      "channelId": "UCOKHwx1VCdgnxwbjyb9Iu1g",
+      "category": "3DCG"
+    },
+    {
+      "name": "Brackeys",
+      "channelId": "UCYbK_tjZ2OrIZFBvU6CCMiA",
+      "category": "ゲーム開発"
+    }
+  ],
+  "scrape": []
+}
