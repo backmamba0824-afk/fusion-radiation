@@ -235,9 +235,16 @@ function App() {
 }
 
 function ArticleCard({ article, formatDate, renderStars, badgeClass }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleToggle = (e) => {
+    e.stopPropagation(); // リンクへの遷移を防ぐ
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <article
-      className="article-card"
+      className={`article-card ${isExpanded ? 'expanded' : ''}`}
       onClick={() => window.open(article.url, '_blank')}
     >
       {article.thumbnail_url && (
@@ -260,7 +267,25 @@ function ArticleCard({ article, formatDate, renderStars, badgeClass }) {
         <h2 className="article-card-title">{article.title}</h2>
 
         {article.summary && (
-          <p className="article-card-summary">{article.summary}</p>
+          <div className="summary-container">
+            <button 
+              className="summary-toggle-btn"
+              onClick={handleToggle}
+              aria-expanded={isExpanded}
+            >
+              <span className="toggle-icon">{isExpanded ? '📖' : '📘'}</span>
+              AI詳細要約 {isExpanded ? 'を閉じる ▴' : 'を読む ▾'}
+            </button>
+            
+            <div className={`article-card-summary-wrapper ${isExpanded ? 'open' : ''}`}>
+              <div className="article-card-summary">
+                {/* 改行対応（\nや改行文字を<br>に変換） */}
+                {article.summary.split(/\\n|\n/).map((line, i) => (
+                  <span key={i}>{line}<br/></span>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
 
         <div className="article-card-footer">
