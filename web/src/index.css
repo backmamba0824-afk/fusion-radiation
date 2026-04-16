@@ -481,6 +481,7 @@ a:hover {
 .badge-video { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
 .badge-parenting { background: rgba(20, 184, 166, 0.15); color: var(--accent-teal); }
 .badge-finance { background: rgba(249, 115, 22, 0.15); color: var(--accent-orange); }
+.badge-housing { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
 
 /* ===== Empty State ===== */
 .empty-state {
@@ -798,7 +799,6 @@ a:hover {
   color: var(--accent-emerald);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
-
 /* Table */
 .source-list {
   background: var(--bg-card);

@@ -11,6 +11,7 @@ const CATEGORIES = [
   { name: '映像制作', emoji: '🎬' },
   { name: '子育て', emoji: '👶' },
   { name: '家計・NISA', emoji: '💰' },
+  { name: '住宅情報', emoji: '🏠' }
 ];
 
 const BADGE_CLASSES = {
@@ -22,6 +23,7 @@ const BADGE_CLASSES = {
   '映像制作': 'badge-video',
   '子育て': 'badge-parenting',
   '家計・NISA': 'badge-finance',
+  '住宅情報': 'badge-housing',
 };
 
 function App() {
