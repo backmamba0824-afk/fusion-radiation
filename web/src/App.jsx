@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchArticles, fetchSources, addSource, deleteSource, toggleSource } from './supabase.js';
+import { fetchArticles, fetchSources, addSource, deleteSource, toggleSource, toggleArticleFavorite } from './supabase.js';
 
 const CATEGORIES = [
   { name: 'すべて', emoji: '📰' },
@@ -34,13 +34,14 @@ function App() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [categoryCounts, setCategoryCounts] = useState({});
   const limit = 20;
 
   const loadArticles = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await fetchArticles({ category, search, page, limit });
+      const result = await fetchArticles({ category, search, page, limit, showFavoritesOnly });
       setArticles(result.articles);
       setTotal(result.total);
       setIsDemo(result.isDemo);
@@ -48,7 +49,7 @@ function App() {
       console.error('記事の取得に失敗:', error);
     }
     setLoading(false);
-  }, [category, search, page]);
+  }, [category, search, page, showFavoritesOnly]);
 
   useEffect(() => {
     async function loadCounts() {
@@ -85,6 +86,15 @@ function App() {
     setView('articles');
   };
 
+  const handleFavoriteToggle = async (articleId, currentStatus) => {
+    const { error } = await toggleArticleFavorite(articleId, currentStatus);
+    if (!error) {
+      setArticles(articles.map(a => 
+        a.id === articleId ? { ...a, is_favorite: !currentStatus } : a
+      ));
+    }
+  };
+
   const totalPages = Math.ceil(total / limit);
 
   const formatDate = (dateStr) => {
@@ -97,12 +107,6 @@ function App() {
     if (hours < 24) return `${hours}時間前`;
     if (hours < 48) return '昨日';
     return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
-  };
-
-  const renderStars = (importance) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <span key={i} className={`star ${i < importance ? '' : 'empty'}`}>★</span>
-    ));
   };
 
   return (
@@ -174,6 +178,20 @@ function App() {
               ))}
             </div>
 
+            <div className="filter-controls">
+              <label className="favorite-filter-label">
+                <input 
+                  type="checkbox" 
+                  checked={showFavoritesOnly}
+                  onChange={(e) => {
+                    setShowFavoritesOnly(e.target.checked);
+                    setPage(1);
+                  }}
+                />
+                🌟 お気に入りのみ表示
+              </label>
+            </div>
+
             {/* Content */}
             {loading ? (
               <div className="loading">
@@ -194,7 +212,7 @@ function App() {
                       key={article.id || article.url}
                       article={article}
                       formatDate={formatDate}
-                      renderStars={renderStars}
+                      onToggleFavorite={handleFavoriteToggle}
                       badgeClass={BADGE_CLASSES[article.category] || ''}
                     />
                   ))}
@@ -234,7 +252,7 @@ function App() {
   );
 }
 
-function ArticleCard({ article, formatDate, renderStars, badgeClass }) {
+function ArticleCard({ article, formatDate, onToggleFavorite, badgeClass }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleToggle = (e) => {
@@ -292,9 +310,16 @@ function ArticleCard({ article, formatDate, renderStars, badgeClass }) {
           <span className="article-date">
             {formatDate(article.published_at)}
           </span>
-          <div className="article-importance">
-            {renderStars(article.importance || 3)}
-          </div>
+          <button 
+            className={`favorite-btn ${article.is_favorite ? 'is-fav' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(article.id, !!article.is_favorite);
+            }}
+            title={article.is_favorite ? 'お気に入りから外す' : 'お気に入りに追加'}
+          >
+            {article.is_favorite ? '🌟' : '☆'}
+          </button>
         </div>
       </div>
     </article>

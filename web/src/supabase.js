@@ -7,10 +7,10 @@ const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
-export async function fetchArticles({ category, search, page = 1, limit = 20 } = {}) {
+export async function fetchArticles({ category, search, page = 1, limit = 20, showFavoritesOnly = false } = {}) {
   // DB未接続時はデモデータを返す
   if (!supabase) {
-    return getDemoData({ category, search, page, limit });
+    return getDemoData({ category, search, page, limit, showFavoritesOnly });
   }
 
   const offset = (page - 1) * limit;
@@ -29,6 +29,10 @@ export async function fetchArticles({ category, search, page = 1, limit = 20 } =
     query = query.or(`title.ilike.%${search}%,summary.ilike.%${search}%`);
   }
 
+  if (showFavoritesOnly) {
+    query = query.eq('is_favorite', true);
+  }
+
   const { data, count, error } = await query;
 
   if (error) {
@@ -43,11 +47,15 @@ export async function fetchArticles({ category, search, page = 1, limit = 20 } =
   };
 }
 
-function getDemoData({ category, search, page = 1, limit = 20 }) {
+function getDemoData({ category, search, page = 1, limit = 20, showFavoritesOnly = false }) {
   let articles = DEMO_ARTICLES;
 
   if (category && category !== 'すべて') {
     articles = articles.filter((a) => a.category === category);
+  }
+
+  if (showFavoritesOnly) {
+    articles = articles.filter((a) => a.is_favorite);
   }
 
   if (search) {
@@ -255,6 +263,20 @@ export async function toggleSource(id, currentStatus) {
   const { error } = await supabase
     .from('sources')
     .update({ is_active: !currentStatus })
+    .eq('id', id);
+
+  return { error };
+}
+
+/**
+ * 記事のお気に入り状態を切り替え
+ */
+export async function toggleArticleFavorite(id, currentStatus) {
+  if (!supabase) return { error: 'Supabase is not connected' };
+
+  const { error } = await supabase
+    .from('articles')
+    .update({ is_favorite: !currentStatus })
     .eq('id', id);
 
   return { error };
