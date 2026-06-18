@@ -62,8 +62,8 @@ function decodeGoogleNewsUrl(url) {
     const padded = id.padEnd(id.length + (4 - id.length % 4) % 4, '=');
     const base64 = padded.replace(/-/g, '+').replace(/_/g, '/');
     const decoded = Buffer.from(base64, 'base64').toString('ascii');
-    const match = decoded.match(/(https?:\/\/[a-zA-Z0-9-._~:/?#[\\]@!$&'()*+,;=%]+)/);
-    return match ? match[1] : url;
+    const match = decoded.match(/https?:\/\/[^\s"'<>]+/);
+    return match ? match[0] : url;
   } catch (error) {
     return url;
   }
