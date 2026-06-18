@@ -7,7 +7,7 @@ let model = null;
 
 if (apiKey) {
   genAI = new GoogleGenerativeAI(apiKey);
-  model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 }
 
 const VALID_CATEGORIES = [
@@ -42,9 +42,9 @@ export async function summarizeArticles(articles) {
 
     console.log(`  📝 進捗: ${Math.min(i + batchSize, articles.length)}/${articles.length}件`);
 
-    // レート制限を避けるため少し待つ
+    // 無料枠レート制限: 10 RPM = 最低6秒/リクエスト、余裕を持って8秒待機
     if (i + batchSize < articles.length) {
-      await sleep(2000);
+      await sleep(8000);
     }
   }
 
