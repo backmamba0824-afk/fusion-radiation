@@ -11,6 +11,8 @@ const CATEGORY_EMOJIS = {
   '映像制作': '🎬',
   '子育て': '👶',
   '家計・NISA': '💰',
+  '住宅情報': '🏠',
+  '著者ウォッチ': '👤',
 };
 
 /**
@@ -94,27 +96,36 @@ export async function sendDigest(articles) {
 }
 
 /**
- * Discord Webhookにメッセージを送信
+ * Discord Webhookにメッセージを送信（リトライ付き）
  */
-async function sendWebhook(url, payload) {
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: 'Fusion Radiation',
-        avatar_url: 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png',
-        ...payload,
-      }),
-    });
+async function sendWebhook(url, payload, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: 'Fusion Radiation',
+          avatar_url: 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png',
+          ...payload,
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Webhook応答: ${response.status} - ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Webhook応答: ${response.status} - ${errorText}`);
+      }
+      return;
+    } catch (error) {
+      if (i === maxRetries - 1) {
+        console.error(`❌ Webhook送信エラー (${maxRetries}回失敗): ${error.message}`);
+        throw error;
+      }
+      const wait = 2000 * (i + 1);
+      console.warn(`  ⚠️ Webhook リトライ ${i + 1}/${maxRetries - 1} (${wait}ms 後)`);
+      await sleep(wait);
     }
-  } catch (error) {
-    console.error(`❌ Webhook送信エラー: ${error.message}`);
-    throw error;
   }
 }
 
@@ -135,14 +146,16 @@ function groupByCategory(articles) {
  */
 function getCategoryColor(category) {
   const colors = {
-    '3DCG': 0xf59e0b,       // Amber
-    'AI': 0x8b5cf6,          // Violet
-    'ゲーム開発': 0x10b981,   // Emerald
-    'デザイン': 0xec4899,     // Pink
+    '3DCG': 0xf59e0b,               // Amber
+    'AI': 0x8b5cf6,                  // Violet
+    'ゲーム開発': 0x10b981,           // Emerald
+    'デザイン': 0xec4899,             // Pink
     'デジタルマーケティング': 0x3b82f6, // Blue
-    '映像制作': 0xef4444,    // Red
-    '子育て': 0x14b8a6,      // Teal
-    '家計・NISA': 0xf97316,  // Orange
+    '映像制作': 0xef4444,            // Red
+    '子育て': 0x14b8a6,              // Teal
+    '家計・NISA': 0xf97316,          // Orange
+    '住宅情報': 0x84cc16,            // Lime
+    '著者ウォッチ': 0x06b6d4,        // Cyan
   };
   return colors[category] || 0x6b7280;
 }

@@ -16,6 +16,7 @@ const parser = new RSSParser({
 export async function collectRSS(feeds, hoursBack = 24) {
   const cutoffDate = new Date(Date.now() - hoursBack * 60 * 60 * 1000);
   const allArticles = [];
+  const failedFeeds = [];
 
   for (const feed of feeds) {
     try {
@@ -43,7 +44,12 @@ export async function collectRSS(feeds, hoursBack = 24) {
       console.log(`  ✅ ${articles.length}件取得`);
     } catch (error) {
       console.error(`  ❌ RSS取得エラー (${feed.name}): ${error.message}`);
+      failedFeeds.push(feed.name);
     }
+  }
+
+  if (failedFeeds.length > 0) {
+    console.warn(`  ⚠️ 取得失敗したフィード (${failedFeeds.length}件): ${failedFeeds.join(', ')}`);
   }
 
   console.log(`📡 RSS合計: ${allArticles.length}件`);

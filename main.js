@@ -34,7 +34,7 @@ loadEnv();
 
 // ★ .env読み込み後にモジュールを動的import
 const { collectAll } = await import('./collector/index.js');
-const { summarizeArticles } = await import('./summarizer/gemini.js');
+const { summarizeArticles } = await import('./summarizer/claude.js');
 const { saveArticles, getUnnotifiedArticles, markAsNotified, logDigest } = await import('./db/supabase.js');
 const { sendDigest } = await import('./notifier/discord.js');
 

@@ -25,6 +25,25 @@ function stripHtml(text) {
 }
 
 /**
+ * Google News の Base64 エンコード URL を安全にデコード
+ */
+function safeDecodeGoogleNewsUrl(url) {
+  if (!url || !url.includes('news.google.com/rss/articles/')) return url;
+  try {
+    const match = url.match(/articles\/([^?&]+)/);
+    if (!match) return url;
+    const id = match[1];
+    const padded = id + '='.repeat((4 - id.length % 4) % 4);
+    const base64 = padded.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = Buffer.from(base64, 'base64').toString('utf-8');
+    const urlMatch = decoded.match(/(https?:\/\/[^\s"'<>]+)/);
+    return urlMatch ? urlMatch[1] : url;
+  } catch {
+    return url;
+  }
+}
+
+/**
  * 急上昇・トレンド記事を収集
  * @param {Array} categories - 現在有効なカテゴリ名の配列 (例: ['AI', '3DCG'])
  * @param {number} hoursBack - 何時間前までの記事を取得するか
@@ -93,7 +112,7 @@ export async function collectTrends(categories, hoursBack = 24) {
           return {
             sourceName: `⭐(急上昇) ${originalSource}`,
             title: cleanTitle,
-            url: item.link,
+            url: safeDecodeGoogleNewsUrl(item.link),
             content: stripHtml(item.contentSnippet || item.content),
             category: cat, // 検索キーワードと同じカテゴリとしてとりあえず設定
             author: originalSource,
