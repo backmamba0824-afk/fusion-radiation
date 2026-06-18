@@ -7,7 +7,7 @@ let model = null;
 
 if (apiKey) {
   genAI = new GoogleGenerativeAI(apiKey);
-  model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 }
 
 const VALID_CATEGORIES = [
@@ -111,7 +111,7 @@ async function fetchFullContent(url, fallback) {
     if (!mainText || mainText.trim().length < 50) return fallback;
 
     // 余分な空白や改行をきれいにして返す（最大10000文字）
-    return mainText.replace(/\\s+/g, ' ').trim().slice(0, 10000);
+    return mainText.replace(/\s+/g, ' ').trim().slice(0, 10000);
   } catch (error) {
     console.log(`    ⚠️ 全文取得スキップ (${url.slice(0, 50)}...): ${error.message}`);
     return fallback;
@@ -162,7 +162,18 @@ ${articlesText}
 JSONのみを返してください。マークダウンのコードブロックは使わないでください。`;
 
   try {
-    const result = await model.generateContent(prompt);
+    let result;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      try {
+        result = await model.generateContent(prompt);
+        break;
+      } catch (err) {
+        if (attempt === 3) throw err;
+        const waitMs = 15000 * Math.pow(2, attempt);
+        console.warn(`  ⏳ リトライ ${attempt + 1}/3 (${waitMs / 1000}秒後): ${err.message.slice(0, 60)}`);
+        await sleep(waitMs);
+      }
+    }
     const responseText = result.response.text().trim();
 
     // JSONを抽出（コードブロックで囲まれている場合に対応）
