@@ -10,7 +10,7 @@
     "digest": "node main.js --digest-only"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.54.0",
+    "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.49.0",
     "cheerio": "^1.0.0",
     "node-fetch": "^3.3.2",
