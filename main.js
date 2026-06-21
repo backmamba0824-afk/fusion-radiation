@@ -76,7 +76,14 @@ async function main() {
       // ========== 2. AI要約・分類 ==========
       articles = await summarizeArticles(articles);
 
-      // ========== 3. DB保存 ==========
+      // ========== 3. 無関係記事を除外 ==========
+      const beforeFilter = articles.length;
+      articles = articles.filter(a => a.category !== '関係なし');
+      if (beforeFilter !== articles.length) {
+        console.log(`🚫 無関係記事を除外: ${beforeFilter - articles.length}件`);
+      }
+
+      // ========== 4. DB保存 ==========
       await saveArticles(articles);
     } else {
       // ダイジェストのみモード: 未通知記事を取得
