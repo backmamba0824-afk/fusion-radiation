@@ -92,6 +92,41 @@ export async function collectTrends(categories, hoursBack = 24) {
   const skipCategories = ['すべて', 'その他'];
   const searchCategories = categories.filter(c => !skipCategories.includes(c));
 
+  // 話題のキーワードを追加検索（カテゴリ外の固定キーワード）
+  const hotKeywords = [
+    { keyword: 'Unreal Engine 6', category: 'ゲーム開発' },
+    { keyword: 'UE6', category: 'ゲーム開発' },
+  ];
+  for (const { keyword, category } of hotKeywords) {
+    try {
+      console.log(`📈 ホットキーワード取得中: ${keyword}`);
+      const searchUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ja&gl=JP&ceid=JP:ja`;
+      const parsed = await parser.parseURL(searchUrl);
+      const articles = (parsed.items || [])
+        .filter(item => new Date(item.pubDate || item.isoDate || 0) >= cutoffDate)
+        .map(item => {
+          const sourceMatch = item.title?.match(/ - (.+)$/);
+          const originalSource = sourceMatch ? sourceMatch[1] : 'Google News';
+          return {
+            sourceName: `⭐(急上昇) ${originalSource}`,
+            title: item.title?.replace(/ - .+$/, '') || '無題',
+            url: safeDecodeGoogleNewsUrl(item.link),
+            content: stripHtml(item.contentSnippet || item.content),
+            category,
+            author: originalSource,
+            publishedAt: item.pubDate || item.isoDate || new Date().toISOString(),
+            thumbnail: null,
+          };
+        })
+        .slice(0, 5);
+      allArticles.push(...articles);
+      console.log(`  ✅ ${articles.length}件取得`);
+    } catch (error) {
+      console.error(`  ❌ ホットキーワード取得エラー (${keyword}): ${error.message}`);
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
   for (const cat of searchCategories) {
     try {
       console.log(`📈 トレンド取得中: Google News [${cat}]`);
