@@ -256,8 +256,16 @@ function App() {
   );
 }
 
+// YouTube動画はURLからサムネイルを直接導出できる（thumbnail_url未登録の古い記事対策）
+function getThumbnail(article) {
+  if (article.thumbnail_url) return article.thumbnail_url;
+  const match = (article.url || '').match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+  return match ? `https://i.ytimg.com/vi/${match[1]}/hqdefault.jpg` : null;
+}
+
 function ArticleCard({ article, formatDate, onToggleFavorite, badgeClass }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const thumbnail = getThumbnail(article);
 
   const handleToggle = (e) => {
     e.stopPropagation(); // リンクへの遷移を防ぐ
@@ -269,15 +277,6 @@ function ArticleCard({ article, formatDate, onToggleFavorite, badgeClass }) {
       className={`article-card ${isExpanded ? 'expanded' : ''}`}
       onClick={() => window.open(article.url, '_blank')}
     >
-      {article.thumbnail_url && (
-        <img
-          className="article-card-thumbnail"
-          src={article.thumbnail_url}
-          alt=""
-          loading="lazy"
-        />
-      )}
-
       <div className="article-card-body">
         <div className="article-card-meta">
           <span className={`article-category-badge ${badgeClass}`}>
@@ -287,6 +286,16 @@ function ArticleCard({ article, formatDate, onToggleFavorite, badgeClass }) {
         </div>
 
         <h2 className="article-card-title">{article.title}</h2>
+
+        {thumbnail && (
+          <img
+            className="article-card-thumbnail"
+            src={thumbnail}
+            alt=""
+            loading="lazy"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+        )}
 
         {article.summary && (
           <div className="summary-container">
