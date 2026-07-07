@@ -9,7 +9,7 @@ on:
       hours_back:
         description: '何時間前までの記事を取得するか'
         required: false
-        default: '24'
+        default: '30'
 
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -37,4 +37,4 @@ jobs:
         run: npm ci
 
       - name: Run Fusion Radiation
-        run: node main.js --hours ${{ github.event.inputs.hours_back || '24' }}
+        run: node main.js --hours ${{ github.event.inputs.hours_back || '30' }}

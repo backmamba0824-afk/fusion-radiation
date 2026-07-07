@@ -44,7 +44,8 @@ async function main() {
   const collectOnly = args.includes('--collect-only');
   const digestOnly = args.includes('--digest-only');
   const limit = parseInt(args.find((a) => a.startsWith('--limit'))?.split('=')[1] || args[args.indexOf('--limit') + 1] || '0', 10);
-  const hoursBack = parseInt(args.find((a) => a.startsWith('--hours'))?.split('=')[1] || args[args.indexOf('--hours') + 1] || '24', 10);
+  // cron の起動遅延で取りこぼしが出ないよう、24時間より広めに取る（重複はURL・タイトルで除去される）
+  const hoursBack = parseInt(args.find((a) => a.startsWith('--hours'))?.split('=')[1] || args[args.indexOf('--hours') + 1] || '30', 10);
 
   console.log('');
   console.log('╔═══════════════════════════════════════╗');
@@ -145,4 +146,7 @@ function printSummary(articles) {
   console.log('');
 }
 
-main();
+await main();
+// 開いたままのHTTP接続等でイベントループが残り、GitHub Actionsが
+// タイムアウト(cancelled)するのを防ぐため明示的に終了する
+process.exit(0);

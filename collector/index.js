@@ -3,6 +3,8 @@ import { collectYouTube } from './youtube.js';
 import { collectScrape } from './scraper.js';
 import { collectTrends } from './trends.js';
 import { collectAuthors } from './authors.js';
+import { resolveGoogleNewsUrls } from './gnews.js';
+import { dedupeByTitle } from './dedup.js';
 import supabase from '../db/supabase.js';
 
 const DEFAULT_CATEGORIES = [
@@ -89,16 +91,23 @@ export async function collectAll(hoursBack = 24) {
 
   const allArticles = [...rssArticles, ...youtubeArticles, ...scrapeArticles, ...trendArticles, ...authorArticles];
 
+  // Google News のリダイレクトURLを実URLに解決
+  // （同一記事でも検索クエリごとにURLが変わるため、解決しないと重複除去が効かない）
+  await resolveGoogleNewsUrls(allArticles);
+
   // URL重複除去
   const seen = new Set();
-  const uniqueArticles = allArticles.filter((article) => {
+  const urlUnique = allArticles.filter((article) => {
     if (seen.has(article.url)) return false;
     seen.add(article.url);
     return true;
   });
 
+  // タイトル重複除去（同じ記事が別メディア・別URLで配信されるケース）
+  const uniqueArticles = dedupeByTitle(urlUnique);
+
   console.log('');
-  console.log(`📊 収集完了: 合計${uniqueArticles.length}件（重複除去後）`);
+  console.log(`📊 収集完了: 合計${uniqueArticles.length}件（重複除去後: URL ${allArticles.length - urlUnique.length}件 / タイトル ${urlUnique.length - uniqueArticles.length}件を除外）`);
   console.log(`   RSS: ${rssArticles.length}件, YouTube: ${youtubeArticles.length}件, スクレイピング: ${scrapeArticles.length}件, 急上昇: ${trendArticles.length}件, 著者: ${authorArticles.length}件`);
   console.log('');
 

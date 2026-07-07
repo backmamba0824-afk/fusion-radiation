@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { normalizeTitle } from '../collector/dedup.js';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -23,7 +24,22 @@ export async function saveArticles(articles) {
   let saved = 0;
   let skipped = 0;
 
+  // 過去7日に保存済みの記事タイトルと照合し、URL違いの同一記事を弾く
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: recent } = await supabase
+    .from('articles')
+    .select('title')
+    .gte('collected_at', sevenDaysAgo);
+  const existingTitles = new Set((recent || []).map((r) => normalizeTitle(r.title)));
+
   for (const article of articles) {
+    const titleKey = normalizeTitle(article.title);
+    if (titleKey && existingTitles.has(titleKey)) {
+      skipped++;
+      continue;
+    }
+    if (titleKey) existingTitles.add(titleKey);
+
     const { error } = await supabase
       .from('articles')
       .upsert(

@@ -92,6 +92,12 @@ export async function collectTrends(categories, hoursBack = 24) {
   const skipCategories = ['すべて', 'その他'];
   const searchCategories = categories.filter(c => !skipCategories.includes(c));
 
+  // カテゴリ名そのままでは検索にヒットしにくいものは、実際のニュースキーワードに置き換える
+  const CATEGORY_QUERIES = {
+    '家計・NISA': '(NISA OR 家計 OR 資産形成 OR 節約) when:1d',
+    '住宅情報': '(住宅ローン OR 注文住宅 OR マイホーム OR 住宅購入) when:1d',
+  };
+
   // 話題のキーワードを追加検索（カテゴリ外の固定キーワード）
   const hotKeywords = [
     { keyword: 'Unreal Engine 6', category: 'ゲーム開発' },
@@ -129,8 +135,9 @@ export async function collectTrends(categories, hoursBack = 24) {
 
   for (const cat of searchCategories) {
     try {
+      const query = CATEGORY_QUERIES[cat] || cat;
       console.log(`📈 トレンド取得中: Google News [${cat}]`);
-      const searchUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(cat)}&hl=ja&gl=JP&ceid=JP:ja`;
+      const searchUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=ja&gl=JP&ceid=JP:ja`;
       const parsed = await parser.parseURL(searchUrl);
 
       const articles = (parsed.items || [])
